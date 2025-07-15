@@ -8,8 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+
 
 const Home = () => {
   const [markdown, setMarkdown] = useState(`# Welcome to Markdown Editor
@@ -117,23 +116,27 @@ ${html}
     if (!previewElement) return;
 
     try {
-      const canvas = await html2canvas(previewElement as HTMLElement, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save('document.pdf');
+      const html2pdf = (await import('html2pdf.js')).default;
+
+      const opt = {
+        margin: 0.5,
+        filename: 'document.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+      };
+
+      await html2pdf().set(opt).from(previewElement).save();
     } catch (error) {
-      console.error('PDF generation error:', error);
+      console.error('PDF generation failed:', error);
     }
   };
+
+
+
+
+  
+
 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 ${isFullscreen ? 'fixed inset-0 z-50 bg-white' : ''}`}>
