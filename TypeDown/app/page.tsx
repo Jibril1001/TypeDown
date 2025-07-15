@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 
-
 const Home = () => {
   const [markdown, setMarkdown] = useState(`# Welcome to Markdown Editor
 
