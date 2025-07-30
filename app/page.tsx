@@ -110,31 +110,132 @@ ${html}
     URL.revokeObjectURL(url);
   };
 
-  const downloadPDF = async () => {
-    const previewElement = document.querySelector('.preview-content');
-    if (!previewElement) return;
+const downloadPDF = async () => {
+  const previewElement = document.querySelector('.preview-content');
+  if (!previewElement) return;
 
-    try {
-      const html2pdf = (await import('html2pdf.js')).default;
+  const root = document.documentElement;
 
-      const opt = {
-        margin: 0.5,
-        filename: 'document.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
-      };
+  const cssVarsToOverride = [
+    '--background',
+    '--foreground',
+    '--card',
+    '--card-foreground',
+    '--popover',
+    '--popover-foreground',
+    '--primary',
+    '--primary-foreground',
+    '--secondary',
+    '--secondary-foreground',
+    '--muted',
+    '--muted-foreground',
+    '--accent',
+    '--accent-foreground',
+    '--destructive',
+    '--border',
+    '--input',
+    '--ring',
 
-      await html2pdf().set(opt).from(previewElement).save();
-    } catch (error) {
-      console.error('PDF generation failed:', error);
-    }
-  };
+    // lab() color variables
+    '--color-green-100',
+    '--color-green-300',
+    '--color-green-600',
+    '--color-green-700',
+    '--color-blue-50',
+    '--color-blue-100',
+    '--color-blue-500',
+    '--color-blue-600',
+    '--color-blue-800',
+    '--color-indigo-500',
+    '--color-purple-100',
+    '--color-purple-300',
+    '--color-purple-600',
+    '--color-purple-700',
+    '--color-pink-100',
+    '--color-pink-600',
+    '--color-slate-50',
+    '--color-gray-100',
+    '--color-gray-500',
+    '--color-gray-600',
+    '--color-gray-700',
+    '--color-gray-900',
+  ];
 
+  const oldValues: { [key: string]: string } = {};
+  cssVarsToOverride.forEach((v) => {
+    oldValues[v] = root.style.getPropertyValue(v) || getComputedStyle(root).getPropertyValue(v);
+  });
 
+  // Override with PDF-safe values
+  root.style.setProperty('--background', '#ffffff');
+  root.style.setProperty('--foreground', '#000000');
+  root.style.setProperty('--card', '#ffffff');
+  root.style.setProperty('--card-foreground', '#000000');
+  root.style.setProperty('--popover', '#ffffff');
+  root.style.setProperty('--popover-foreground', '#000000');
+  root.style.setProperty('--primary', '#222222');
+  root.style.setProperty('--primary-foreground', '#ffffff');
+  root.style.setProperty('--secondary', '#eeeeee');
+  root.style.setProperty('--secondary-foreground', '#222222');
+  root.style.setProperty('--muted', '#eeeeee');
+  root.style.setProperty('--muted-foreground', '#666666');
+  root.style.setProperty('--accent', '#eeeeee');
+  root.style.setProperty('--accent-foreground', '#222222');
+  root.style.setProperty('--destructive', '#cc3333');
+  root.style.setProperty('--border', '#cccccc');
+  root.style.setProperty('--input', '#cccccc');
+  root.style.setProperty('--ring', '#999999');
 
+  // Override lab() colors with RGB/HEX equivalents
+  root.style.setProperty('--color-green-100', '#dcfce7');
+  root.style.setProperty('--color-green-300', '#86efac');
+  root.style.setProperty('--color-green-600', '#16a34a');
+  root.style.setProperty('--color-green-700', '#15803d');
+  root.style.setProperty('--color-blue-50', '#eff6ff');
+  root.style.setProperty('--color-blue-100', '#dbeafe');
+  root.style.setProperty('--color-blue-500', '#3b82f6');
+  root.style.setProperty('--color-blue-600', '#2563eb');
+  root.style.setProperty('--color-blue-800', '#1e40af');
+  root.style.setProperty('--color-indigo-500', '#6366f1');
+  root.style.setProperty('--color-purple-100', '#f3e8ff');
+  root.style.setProperty('--color-purple-300', '#c084fc');
+  root.style.setProperty('--color-purple-600', '#9333ea');
+  root.style.setProperty('--color-purple-700', '#7e22ce');
+  root.style.setProperty('--color-pink-100', '#fce7f3');
+  root.style.setProperty('--color-pink-600', '#db2777');
+  root.style.setProperty('--color-slate-50', '#f8fafc');
+  root.style.setProperty('--color-gray-100', '#f3f4f6');
+  root.style.setProperty('--color-gray-500', '#6b7280');
+  root.style.setProperty('--color-gray-600', '#4b5563');
+  root.style.setProperty('--color-gray-700', '#374151');
+  root.style.setProperty('--color-gray-900', '#111827');
 
-  
+  try {
+    const html2pdf = (await import('html2pdf.js')).default;
+
+    const opt = {
+      margin: 0.5,
+      filename: 'document.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+    };
+
+    await html2pdf().set(opt).from(previewElement).save();
+  } catch (error) {
+    console.error('PDF generation failed:', error);
+  } finally {
+    // Restore all original values
+    cssVarsToOverride.forEach((v) => {
+      if (oldValues[v]) {
+        root.style.setProperty(v, oldValues[v]);
+      } else {
+        root.style.removeProperty(v);
+      }
+    });
+  }
+};
+
 
 
   return (
